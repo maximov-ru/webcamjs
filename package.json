@@ -1,9 +1,9 @@
 {
-	"name": "webcamjs",
+	"name": "webcamjs-extended",
 	"version": "1.0.22",
 	"description": "HTML5 Webcam Image Capture Library with Flash Fallback",
 	"author": "Joseph Huckaby <jhuckaby@gmail.com>",
-	"homepage": "https://github.com/jhuckaby/webcamjs",
+	"homepage": "https://github.com/maximov-ru/webcamjs",
 	"license": "MIT",
 	"main": "webcam.js",
 	"scripts": {
@@ -11,10 +11,10 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/jhuckaby/webcamjs"
+		"url": "https://github.com/maximov-ru/webcamjs"
 	},
 	"bugs": {
-		"url": "https://github.com/jhuckaby/webcamjs/issues"
+		"url": "https://github.com/maximov-ru/webcamjs/issues"
 	},
 	"keywords": [
 		"webcam",
