@@ -190,12 +190,37 @@ var Webcam = {
 		//    http://www.impulseadventure.com/photo/exif-orientation.html
 		//    link source wikipedia (https://en.wikipedia.org/wiki/Exif#cite_note-20)
 		var img = new Image();
+		var self = this;
 		img.addEventListener('load', function(event) {
 			var canvas = document.createElement('canvas');
 			var ctx = canvas.getContext('2d');
-			
+            var imgRatio = img.height / img.width;
+            var ratio = self.params.dest_height / self.params.dest_width;
+            var calculatedOrientation = orientation;
+
+            // need rotate image
+            if ((imgRatio > 1 && ratio < 1) || (imgRatio < 1 && ratio > 1)) {
+            	if (orientation < 5) {
+                    switch (orientation) {
+                        case 1: calculatedOrientation = 6;
+                        case 2: calculatedOrientation = 5;
+                        case 3: calculatedOrientation = 8;
+                        case 4: calculatedOrientation = 7;
+                    }
+				}
+			} else {
+            	if (orientation >= 5) {
+                    switch (orientation) {
+                        case 5: calculatedOrientation = 2;
+                        case 6: calculatedOrientation = 1;
+                        case 7: calculatedOrientation = 4;
+                        case 8: calculatedOrientation = 3;
+                    }
+				}
+			}
+
 			// switch width height if orientation needed
-			if (orientation < 5) {
+			if (calculatedOrientation < 5) {
 				canvas.width = img.width;
 				canvas.height = img.height;
 			} else {
@@ -204,7 +229,7 @@ var Webcam = {
 			}
 
 			// transform (rotate) image - see link at beginning this method
-			switch (orientation) {
+			switch (calculatedOrientation) {
 				case 2: ctx.transform(-1, 0, 0, 1, img.width, 0); break;
 				case 3: ctx.transform(-1, 0, 0, -1, img.width, img.height); break;
 				case 4: ctx.transform(1, 0, 0, -1, 0, img.height); break;
@@ -236,7 +261,7 @@ var Webcam = {
 		
 		// insert "peg" so we can insert our preview canvas adjacent to it later on
 		var peg = document.createElement('div');
-		elem.appendChild( peg );
+        elem.appendChild( peg );
 		this.peg = peg;
 		
 		// set width/height if not already set
@@ -370,6 +395,7 @@ var Webcam = {
 						var ctx = canvas.getContext('2d');
 
 						// crop and scale image for final size
+						//todo may be not crop here
 						ratio = Math.min(image.width / params.dest_width, image.height / params.dest_height);
 						var sw = params.dest_width * ratio;
 						var sh = params.dest_height * ratio;
@@ -385,15 +411,17 @@ var Webcam = {
 					// read EXIF data
 					var fileReader = new FileReader();
 					fileReader.addEventListener('load', function(e) {
+						// TODO: image.orient
+
 						var orientation = self.exifOrientation(e.target.result);
-						if (orientation > 1) {
+						//if (orientation > 1) {
 							// image need to rotate (see comments on fixOrientation method for more information)
 							// transform image and load to image object
 							self.fixOrientation(objURL, orientation, image);
-						} else {
+						//} else {
 							// load image data to image object
-							image.src = objURL;
-						}
+						//	image.src = objURL;
+						//}
 					}, false);
 					
 					// Convert image data to blob format
@@ -830,6 +858,14 @@ var Webcam = {
 			if (this.src && this.width && this.height) {
 				context.drawImage(this, 0, 0, params.dest_width, params.dest_height);
 			}
+			uf = function (o) {
+				if (o !== undefined) {
+					return o;
+				} else {
+                    return 'undefined';
+				}
+			}
+            console.log('info',uf(user_canvas));
 			
 			// crop if desired
 			if (params.crop_width && params.crop_height) {
@@ -837,8 +873,10 @@ var Webcam = {
 				crop_canvas.width = params.crop_width;
 				crop_canvas.height = params.crop_height;
 				var crop_context = crop_canvas.getContext('2d');
-				
-				crop_context.drawImage( canvas, 
+				console.log('crop context');
+
+
+				crop_context.drawImage( canvas,
 					Math.floor( (params.dest_width / 2) - (params.crop_width / 2) ),
 					Math.floor( (params.dest_height / 2) - (params.crop_height / 2) ),
 					params.crop_width,
@@ -852,8 +890,11 @@ var Webcam = {
 				// swap canvases
 				context = crop_context;
 				canvas = crop_canvas;
+                console.log('image', context, ' canvas',canvas);
 			}
-			
+
+            console.log('image', context, ' canvas',canvas);
+
 			// render to user canvas if desired
 			if (user_canvas) {
 				var user_context = user_canvas.getContext('2d');
@@ -871,7 +912,24 @@ var Webcam = {
 		// grab image frame from userMedia or flash movie
 		if (this.userMedia) {
 			// native implementation
-			context.drawImage(this.video, 0, 0, this.params.dest_width, this.params.dest_height);
+            var videoCanvas = document.createElement('canvas');
+            videoCanvas.width = this.video.videoWidth;
+            videoCanvas.height = this.video.videoHeight;
+            var videoContext = videoCanvas.getContext('2d');
+
+            var imgRatio = this.video.videoHeight / this.video.videoWidth;
+            var ratio = this.params.dest_height / this.params.dest_width;
+
+            // need rotate image
+            if ((imgRatio > 1 && ratio < 1) || (imgRatio < 1 && ratio > 1)) {
+				videoCanvas.height = this.video.videoWidth;
+				videoCanvas.width = this.video.videoHeight;
+                videoContext.transform(0, -1, 1, 0, 0, this.video.videoWidth);
+            }
+
+            videoContext.drawImage(this.video, 0, 0, this.video.videoWidth, this.video.videoHeight);
+
+			context.drawImage(videoCanvas, 0, 0, this.params.dest_width, this.params.dest_height);
 			
 			// fire callback right away
 			func();
@@ -903,7 +961,8 @@ var Webcam = {
 		else {
 			// flash fallback
 			var raw_data = this.getMovie()._snap();
-			
+
+			console.log('gm',this.getMovie());
 			// render to image, fire callback when complete
 			var img = new Image();
 			img.onload = func;
