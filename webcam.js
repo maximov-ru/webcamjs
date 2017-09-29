@@ -194,28 +194,28 @@ var Webcam = {
 		img.addEventListener('load', function(event) {
 			var canvas = document.createElement('canvas');
 			var ctx = canvas.getContext('2d');
-            var imgRatio = img.height / img.width;
-            var ratio = self.params.dest_height / self.params.dest_width;
-            var calculatedOrientation = orientation;
+			var imgRatio = img.height / img.width;
+			var ratio = self.params.dest_height / self.params.dest_width;
+			var calculatedOrientation = orientation;
 
-            // need rotate image
-            if ((imgRatio > 1 && ratio < 1) || (imgRatio < 1 && ratio > 1)) {
-            	if (orientation < 5) {
-                    switch (orientation) {
-                        case 1: calculatedOrientation = 6;
-                        case 2: calculatedOrientation = 5;
-                        case 3: calculatedOrientation = 8;
-                        case 4: calculatedOrientation = 7;
-                    }
+			// need rotate image
+			if ((imgRatio > 1 && ratio < 1) || (imgRatio < 1 && ratio > 1)) {
+				if (orientation < 5) {
+					switch (orientation) {
+						case 1: calculatedOrientation = 6;
+						case 2: calculatedOrientation = 5;
+						case 3: calculatedOrientation = 8;
+						case 4: calculatedOrientation = 7;
+					}
 				}
 			} else {
-            	if (orientation >= 5) {
-                    switch (orientation) {
-                        case 5: calculatedOrientation = 2;
-                        case 6: calculatedOrientation = 1;
-                        case 7: calculatedOrientation = 4;
-                        case 8: calculatedOrientation = 3;
-                    }
+				if (orientation >= 5) {
+					switch (orientation) {
+						case 5: calculatedOrientation = 2;
+						case 6: calculatedOrientation = 1;
+						case 7: calculatedOrientation = 4;
+						case 8: calculatedOrientation = 3;
+					}
 				}
 			}
 
@@ -261,7 +261,7 @@ var Webcam = {
 		
 		// insert "peg" so we can insert our preview canvas adjacent to it later on
 		var peg = document.createElement('div');
-        elem.appendChild( peg );
+		elem.appendChild( peg );
 		this.peg = peg;
 		
 		// set width/height if not already set
@@ -411,17 +411,10 @@ var Webcam = {
 					// read EXIF data
 					var fileReader = new FileReader();
 					fileReader.addEventListener('load', function(e) {
-						// TODO: image.orient
 
 						var orientation = self.exifOrientation(e.target.result);
-						//if (orientation > 1) {
-							// image need to rotate (see comments on fixOrientation method for more information)
-							// transform image and load to image object
-							self.fixOrientation(objURL, orientation, image);
-						//} else {
-							// load image data to image object
-						//	image.src = objURL;
-						//}
+
+						self.fixOrientation(objURL, orientation, image);
 					}, false);
 					
 					// Convert image data to blob format
@@ -609,29 +602,29 @@ var Webcam = {
 		// Code snippet borrowed from: https://github.com/swfobject/swfobject
 		var SHOCKWAVE_FLASH = "Shockwave Flash",
 			SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash",
-        	FLASH_MIME_TYPE = "application/x-shockwave-flash",
-        	win = window,
-        	nav = navigator,
-        	hasFlash = false;
-        
-        if (typeof nav.plugins !== "undefined" && typeof nav.plugins[SHOCKWAVE_FLASH] === "object") {
-        	var desc = nav.plugins[SHOCKWAVE_FLASH].description;
-        	if (desc && (typeof nav.mimeTypes !== "undefined" && nav.mimeTypes[FLASH_MIME_TYPE] && nav.mimeTypes[FLASH_MIME_TYPE].enabledPlugin)) {
-        		hasFlash = true;
-        	}
-        }
-        else if (typeof win.ActiveXObject !== "undefined") {
-        	try {
-        		var ax = new ActiveXObject(SHOCKWAVE_FLASH_AX);
-        		if (ax) {
-        			var ver = ax.GetVariable("$version");
-        			if (ver) hasFlash = true;
-        		}
-        	}
-        	catch (e) {;}
-        }
-        
-        return hasFlash;
+			FLASH_MIME_TYPE = "application/x-shockwave-flash",
+			win = window,
+			nav = navigator,
+			hasFlash = false;
+
+		if (typeof nav.plugins !== "undefined" && typeof nav.plugins[SHOCKWAVE_FLASH] === "object") {
+			var desc = nav.plugins[SHOCKWAVE_FLASH].description;
+			if (desc && (typeof nav.mimeTypes !== "undefined" && nav.mimeTypes[FLASH_MIME_TYPE] && nav.mimeTypes[FLASH_MIME_TYPE].enabledPlugin)) {
+				hasFlash = true;
+			}
+		}
+		else if (typeof win.ActiveXObject !== "undefined") {
+			try {
+				var ax = new ActiveXObject(SHOCKWAVE_FLASH_AX);
+				if (ax) {
+					var ver = ax.GetVariable("$version");
+					if (ver) hasFlash = true;
+				}
+			}
+			catch (e) {;}
+		}
+
+		return hasFlash;
 	},
 	
 	getSWFHTML: function() {
@@ -858,14 +851,6 @@ var Webcam = {
 			if (this.src && this.width && this.height) {
 				context.drawImage(this, 0, 0, params.dest_width, params.dest_height);
 			}
-			uf = function (o) {
-				if (o !== undefined) {
-					return o;
-				} else {
-                    return 'undefined';
-				}
-			}
-            console.log('info',uf(user_canvas));
 			
 			// crop if desired
 			if (params.crop_width && params.crop_height) {
@@ -873,8 +858,6 @@ var Webcam = {
 				crop_canvas.width = params.crop_width;
 				crop_canvas.height = params.crop_height;
 				var crop_context = crop_canvas.getContext('2d');
-				console.log('crop context');
-
 
 				crop_context.drawImage( canvas,
 					Math.floor( (params.dest_width / 2) - (params.crop_width / 2) ),
@@ -890,10 +873,7 @@ var Webcam = {
 				// swap canvases
 				context = crop_context;
 				canvas = crop_canvas;
-                console.log('image', context, ' canvas',canvas);
 			}
-
-            console.log('image', context, ' canvas',canvas);
 
 			// render to user canvas if desired
 			if (user_canvas) {
@@ -912,22 +892,22 @@ var Webcam = {
 		// grab image frame from userMedia or flash movie
 		if (this.userMedia) {
 			// native implementation
-            var videoCanvas = document.createElement('canvas');
-            videoCanvas.width = this.video.videoWidth;
-            videoCanvas.height = this.video.videoHeight;
-            var videoContext = videoCanvas.getContext('2d');
+			var videoCanvas = document.createElement('canvas');
+			videoCanvas.width = this.video.videoWidth;
+			videoCanvas.height = this.video.videoHeight;
+			var videoContext = videoCanvas.getContext('2d');
 
-            var imgRatio = this.video.videoHeight / this.video.videoWidth;
-            var ratio = this.params.dest_height / this.params.dest_width;
+			var imgRatio = this.video.videoHeight / this.video.videoWidth;
+			var ratio = this.params.dest_height / this.params.dest_width;
 
-            // need rotate image
-            if ((imgRatio > 1 && ratio < 1) || (imgRatio < 1 && ratio > 1)) {
+			// need rotate image
+			if ((imgRatio > 1 && ratio < 1) || (imgRatio < 1 && ratio > 1)) {
 				videoCanvas.height = this.video.videoWidth;
 				videoCanvas.width = this.video.videoHeight;
-                videoContext.transform(0, -1, 1, 0, 0, this.video.videoWidth);
-            }
+				videoContext.transform(0, -1, 1, 0, 0, this.video.videoWidth);
+			}
 
-            videoContext.drawImage(this.video, 0, 0, this.video.videoWidth, this.video.videoHeight);
+			videoContext.drawImage(this.video, 0, 0, this.video.videoWidth, this.video.videoHeight);
 
 			context.drawImage(videoCanvas, 0, 0, this.params.dest_width, this.params.dest_height);
 			
@@ -962,7 +942,6 @@ var Webcam = {
 			// flash fallback
 			var raw_data = this.getMovie()._snap();
 
-			console.log('gm',this.getMovie());
 			// render to image, fire callback when complete
 			var img = new Image();
 			img.onload = func;
