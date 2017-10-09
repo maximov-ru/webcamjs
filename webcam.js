@@ -34,7 +34,7 @@ FlashError.prototype = new IntermediateInheritor();
 WebcamError.prototype = new IntermediateInheritor();
 
 var Webcam = {
-	version: '1.0.23',
+	version: '1.0.25',
 
 	// globals
 	protocol: location.protocol.match(/https/i) ? 'https' : 'http',
