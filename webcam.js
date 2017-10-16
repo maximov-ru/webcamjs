@@ -1,4 +1,4 @@
-// WebcamJS v1.0.22
+// WebcamJS v1.0.26
 // Webcam library for capturing JPEG/PNG images in JavaScript
 // Attempts getUserMedia, falls back to Flash
 // Author: Joseph Huckaby: http://github.com/jhuckaby
@@ -34,7 +34,7 @@ FlashError.prototype = new IntermediateInheritor();
 WebcamError.prototype = new IntermediateInheritor();
 
 var Webcam = {
-	version: '1.0.25',
+	version: '1.0.26',
 
 	// globals
 	protocol: location.protocol.match(/https/i) ? 'https' : 'http',
@@ -93,6 +93,8 @@ var Webcam = {
 					}
 				} : null);
 
+		this.videoDevices = [];
+
 		window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
 		this.userMedia = this.userMedia && !!this.mediaDevices && !!window.URL;
 
@@ -110,6 +112,25 @@ var Webcam = {
 			window.addEventListener( 'beforeunload', function(event) {
 				self.reset();
 			} );
+		}
+
+		console.log('webcamjs init')
+		this.currentDevice = null;
+		if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+			navigator.mediaDevices.enumerateDevices()
+				.then( function (devices) {
+					devices.forEach(function(device) {
+						if (device.kind === 'videoinput') {
+							self.videoDevices.push(device);
+						}
+					});
+					if (self.videoDevices.length > 0) {
+
+						self.currentDevice = self.videoDevices[0];
+						console.log('self.currentDevice', self.currentDevice);
+					}
+					console.log('videoDevices', self.videoDevices);
+				});
 		}
 	},
 
@@ -321,12 +342,7 @@ var Webcam = {
 				mandatory.minHeight = mandatory.minWidth / this.params.display_aspect_ratio;
 			}
 
-			this.mediaDevices.getUserMedia({
-				"audio": false,
-				"video": this.params.constraints || {
-					mandatory: mandatory
-				}
-			})
+			this.getPossibleMediaDevice(mandatory)
 				.then( function(stream) {
 					// got access, attach stream to video
 					video.onloadedmetadata = function(e) {
@@ -530,6 +546,76 @@ var Webcam = {
 		else {
 			// no crop, set size to desired
 		}
+	},
+
+	getVideoDevices: function() {
+		return this.videoDevices;
+	},
+
+	getPossibleMediaDevice: function(mandatory) {
+		var self = this;
+
+		var config = Object.assign({}, this.params.constraints || {
+				mandatory: mandatory
+			});
+
+		if (this.currentDevice) {
+			config.deviceId = {exact: this.currentDevice.deviceId};
+		}
+
+		return this.mediaDevices.getUserMedia({
+			"audio": false,
+			"video": config
+		})
+			.catch(function (e) {
+				if (self.currentDevice) {
+					// remove this device from list
+					var devIndex = 0;
+					self.videoDevices = self.videoDevices.filter(function (device, index) {
+						if (device === self.currentDevice) {
+							devIndex = index;
+						}
+
+						return device !== self.currentDevice;
+					})
+
+					this.removedDevice(this.currentDevice);
+
+					if (self.videoDevices) {
+						devIndex = devIndex % self.videoDevices.length;
+						this.currentDevice = self.videoDevices[devIndex];
+					} else {
+						console.log('webcamjs: delete cerrentDevice. last try: run without deviceId', this.currentDevice.deviceId);
+						this.currentDevice = null;
+					}
+					return self.getPossibleMediaDevice(mandatory);
+					// generate massage about one camera cant be switched
+				} else {
+					throw e;
+				}
+			})
+	},
+
+	removedDevice: function(device) {
+		console.log('webcamjs removed divice ', device);
+		if (this.params.devices_updated_callback) {
+			this.params.devices_updated_callback({type: 'remove',target: device})
+		}
+	},
+
+	switchCamera: function() {
+		var self = this;
+		var devIndex = self.videoDevices.findIndex(function (device) {
+			return self.currentDevice === device;
+		});
+		if (devIndex === -1) {
+			throw new Error('can\'t find current device with id:' + this.currentDevice.deviceId);
+		}
+		devIndex = (devIndex + 1) % self.videoDevices.length;
+		this.currentDevice = self.videoDevices[devIndex];
+		var container = this.container;
+		this.reset();
+		this.attach(container);
 	},
 
 	reset: function() {
