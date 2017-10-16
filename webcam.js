@@ -586,7 +586,6 @@ var Webcam = {
 						this.currentDevice = null;
 					}
 					return self.getPossibleMediaDevice(mandatory);
-					// generate massage about one camera cant be switched
 				} else {
 					throw e;
 				}
