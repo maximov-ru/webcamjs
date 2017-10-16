@@ -114,7 +114,6 @@ var Webcam = {
 			} );
 		}
 
-		console.log('webcamjs init')
 		this.currentDevice = null;
 		if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
 			navigator.mediaDevices.enumerateDevices()
@@ -127,9 +126,7 @@ var Webcam = {
 					if (self.videoDevices.length > 0) {
 
 						self.currentDevice = self.videoDevices[0];
-						console.log('self.currentDevice', self.currentDevice);
 					}
-					console.log('videoDevices', self.videoDevices);
 				});
 		}
 	},
@@ -585,7 +582,7 @@ var Webcam = {
 						devIndex = devIndex % self.videoDevices.length;
 						this.currentDevice = self.videoDevices[devIndex];
 					} else {
-						console.log('webcamjs: delete cerrentDevice. last try: run without deviceId', this.currentDevice.deviceId);
+						console.log('webcamjs: delete currentDevice. last try: run without deviceId', this.currentDevice.deviceId);
 						this.currentDevice = null;
 					}
 					return self.getPossibleMediaDevice(mandatory);
@@ -597,7 +594,7 @@ var Webcam = {
 	},
 
 	removedDevice: function(device) {
-		console.log('webcamjs removed divice ', device);
+		console.log('webcamjs removed device ', device);
 		if (this.params.devices_updated_callback) {
 			this.params.devices_updated_callback({type: 'remove',target: device})
 		}
