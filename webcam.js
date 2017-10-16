@@ -574,16 +574,16 @@ var Webcam = {
 						}
 
 						return device !== self.currentDevice;
-					})
+					});
 
-					this.removedDevice(this.currentDevice);
+					self.removedDevice(self.currentDevice);
 
 					if (self.videoDevices) {
 						devIndex = devIndex % self.videoDevices.length;
-						this.currentDevice = self.videoDevices[devIndex];
+						self.currentDevice = self.videoDevices[devIndex];
 					} else {
-						console.log('webcamjs: delete currentDevice. last try: run without deviceId', this.currentDevice.deviceId);
-						this.currentDevice = null;
+						console.log('webcamjs: delete currentDevice. last try: run without deviceId', self.currentDevice.deviceId);
+						self.currentDevice = null;
 					}
 					return self.getPossibleMediaDevice(mandatory);
 				} else {
