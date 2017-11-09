@@ -1,4 +1,4 @@
-// WebcamJS v1.0.26
+// WebcamJS v1.0.27
 // Webcam library for capturing JPEG/PNG images in JavaScript
 // Attempts getUserMedia, falls back to Flash
 // Author: Joseph Huckaby: http://github.com/jhuckaby
@@ -1009,12 +1009,6 @@ var Webcam = {
 		canvas.width = dest_width;
 		canvas.height = dest_height;
 		var context = canvas.getContext('2d');
-
-		// flip canvas horizontally if desired
-		if (this.params.flip_horiz) {
-			context.translate( dest_width, 0 );
-			context.scale( -1, 1 );
-		}
 
 		// create inline function, called after image load (flash) or immediately (native)
 		var func = function() {
