@@ -252,6 +252,7 @@ var Webcam = {
 	attach: function(elem) {
 		// create webcam preview and attach to DOM element
 		// pass in actual DOM reference, ID, or CSS selector
+		var self = this;
 		if (typeof(elem) == 'string') {
 			elem = document.getElementById(elem) || document.querySelector(elem);
 		}
@@ -295,7 +296,6 @@ var Webcam = {
 		scaleX = this.params.width ? scaleX : scaleY;
 		scaleY = this.params.height ? scaleY : scaleX;
 
-
 		if (this.userMedia) {
 			// setup webcam video container
 			var video = document.createElement('video');
@@ -308,11 +308,7 @@ var Webcam = {
 				video.style.msTransformOrigin = '0px 0px';
 				video.style.oTransformOrigin = '0px 0px';
 				video.style.transformOrigin = '0px 0px';
-				video.style.webkitTransform = 'scaleX('+scaleX+') scaleY('+scaleY+')';
-				video.style.mozTransform = 'scaleX('+scaleX+') scaleY('+scaleY+')';
-				video.style.msTransform = 'scaleX('+scaleX+') scaleY('+scaleY+')';
-				video.style.oTransform = 'scaleX('+scaleX+') scaleY('+scaleY+')';
-				video.style.transform = 'scaleX('+scaleX+') scaleY('+scaleY+')';
+				this.updateVideoStyles(video, scaleX, scaleY);
 			}
 
 			// add video element to dom
@@ -348,6 +344,14 @@ var Webcam = {
 						self.live = true;
 						video.style.width = '' + video.videoWidth + 'px';
 						video.style.height = '' + video.videoHeight + 'px';
+
+						//recalc scales
+						scaleX = self.params.width ? self.params.width / video.videoWidth : 1;
+						scaleY = self.params.height ? self.params.height / video.videoHeight : 1;
+						scaleX = self.params.width ? scaleX : scaleY;
+						scaleY = self.params.height ? scaleY : scaleX;
+						self.updateVideoStyles(video, scaleX, scaleY);
+
 						elem.style.width = '' + (video.videoWidth * scaleX) + 'px';
 						elem.style.height = '' + (video.videoHeight * scaleY) + 'px';
 
@@ -543,6 +547,14 @@ var Webcam = {
 		else {
 			// no crop, set size to desired
 		}
+	},
+
+	updateVideoStyles: function(video, scaleX, scaleY) {
+		video.style.webkitTransform = 'scaleX('+scaleX+') scaleY('+scaleY+')';
+		video.style.mozTransform = 'scaleX('+scaleX+') scaleY('+scaleY+')';
+		video.style.msTransform = 'scaleX('+scaleX+') scaleY('+scaleY+')';
+		video.style.oTransform = 'scaleX('+scaleX+') scaleY('+scaleY+')';
+		video.style.transform = 'scaleX('+scaleX+') scaleY('+scaleY+')';
 	},
 
 	getVideoDevices: function() {
